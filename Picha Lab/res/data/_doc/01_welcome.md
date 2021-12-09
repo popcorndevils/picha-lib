@@ -1,1 +1,0 @@
-Generic welcome text here.
