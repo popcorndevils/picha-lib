@@ -4,6 +4,7 @@ namespace PichaLib
 {
     public static partial class PFactory
     {
+        // TODO move all this logic to an array algorithms class?
         private static bool _NeighborIs(this string[,] array, int x, int y, string value) 
         {
             var _testVals = array._GatherNeighbors(x, y);
@@ -28,6 +29,7 @@ namespace PichaLib
                 (x, y + 1),
             };
 
+            // TODO Fix this kind of wonky implementation?
             foreach((int xT, int yT) _a in _addresses)
             {
                 try { _output.Add(array[_a.yT, _a.xT]); }

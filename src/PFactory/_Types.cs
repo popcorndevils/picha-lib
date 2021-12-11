@@ -2,6 +2,7 @@ using System.Collections.Generic;
 
 namespace PichaLib
 {
+    // TODO move to types class?  Why force it to be internal?  Eventually move code here from godot that handles gen rules for frames.
     internal struct CellData
     {
         public bool MirrorX;
