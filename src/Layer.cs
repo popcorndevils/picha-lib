@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 
+using Bitmap = System.Drawing.Bitmap;
+
 using OctavianLib;
 
 namespace PichaLib
@@ -10,6 +12,7 @@ namespace PichaLib
     public class Layer
     {
         public event LayerChangeHandler LayerChanged;
+        private CellData _ColorData;
 
         private string _Name;
         public string Name {
@@ -112,17 +115,40 @@ namespace PichaLib
             }
         }
 
-        public List<Frame> RunCycles()
+        public List<Bitmap> Generate()
         {
-            var _output = new List<Frame>();
-            foreach(Frame _frame in this.Frames)
+            return this.GenShape().GenColor();
+        }
+
+        public Layer GenShape()
+        {
+            var _output = this.Copy();
+            _output.Frames = new List<Frame>();
+            foreach(Frame _f in this.Frames)
             {
-                _output.Add(_frame.RunCycles(this.Cycles));
+                _output.Frames.Add(_f.RunCycles(this.Cycles));
             }
             return _output;
         }
 
-        public CellData GenerateColors()
+        public List<Bitmap> GenColor()
+        {
+            var _output = new List<Bitmap>();
+            var _colors = this.PickColors();
+
+            foreach(Frame f in this.Frames)
+            {
+                var _product = f.Generate(_colors);
+                for(int i = 0; i < f.Timing; i++)
+                {
+                    _output.Add(_product);
+                }
+            }
+
+            return _output;
+        }
+
+        public CellData PickColors()
         {
             var _output = new CellData() {
                 MirrorX = this.MirrorX,

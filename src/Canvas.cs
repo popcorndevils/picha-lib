@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Bitmap = System.Drawing.Bitmap;
+using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace PichaLib
 {
@@ -40,6 +42,22 @@ namespace PichaLib
                 var _ext = this.Extents;
                 return (_ext.MaxX - _ext.MinX, _ext.MaxY - _ext.MinY);
             }
+        }
+
+        public List<Bitmap> Generate()
+        {
+            var _output = new List<Bitmap>();
+
+            foreach(Layer _l in this.Layers)
+            {
+                var _canvasLayer = new Bitmap(this.Size.H, this.Size.W, PixelFormat.Canonical);
+                // [0] only grabs the first bitmap because Layer.Generate() creates images based on timing.
+                // TODO implement handling of timing variable so exporting will work.
+                var _layerData = _l.Generate()[0];
+                _output.Add(_layerData);
+            }
+
+            return _output;
         }
 
         // useful for the app only.

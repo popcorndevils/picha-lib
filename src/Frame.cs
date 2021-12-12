@@ -1,6 +1,10 @@
 using System;
 using System.Collections.Generic;
 
+using SysColor = System.Drawing.Color;
+using Bitmap = System.Drawing.Bitmap;
+using PixelFormat = System.Drawing.Imaging.PixelFormat;
+
 using OctavianLib;
 
 namespace PichaLib
@@ -13,7 +17,6 @@ namespace PichaLib
         public int GetWidth() { return this.Data.GetWidth(); }
         public int GetHeight() { return this.Data.GetHeight(); }
         
-
         public string RunPolicy(Policy p, int x, int y)
         {
             if(PFactory.Random.NextDouble() <= p.Rate)
@@ -78,6 +81,70 @@ namespace PichaLib
             foreach(Cycle _cycle in cycles)
             {
                 _output = _output.RunPolicies(_cycle.Policies);
+            }
+
+            return _output;
+        }
+
+        public Bitmap Generate(CellData cd)
+        {
+            int _w = this.GetWidth();
+            int _h = this.GetHeight();
+            var _color = new SysColor[_h, _w];
+
+            for(int y = 0; y < _h; y++)
+            {
+                for(int x = 0; x < _w; x++)
+                {
+                    var _cell = this.Data[y, x];
+                    var _cSet = cd.Pixels[_cell];
+                    if(_cell != Pixel.NULL)
+                    {
+                        float _grade = 0f;
+
+                        switch(cd.Pixels[_cell].FadeDirection)
+                        {
+                            case FadeDirection.NORTH:
+                                _grade = (float)((y + 1f) / _h);
+                                break;
+                            case FadeDirection.WEST:
+                                _grade = (float)((x + 1f) / _w);
+                                break;
+                            case FadeDirection.SOUTH:
+                                _grade = 1f - (float)((y + 1f) / _h);
+                                break;
+                            case FadeDirection.EAST:
+                                _grade = 1f - (float)((x + 1f) / _w);
+                                break;
+                            case FadeDirection.NONE:
+                                _grade = 1f;
+                                break;
+                        }
+
+                        float u_sin = (float)Math.Cos(_grade * Math.PI);
+                        float _l = (float)(PFactory.Random.RandfRange(0f, cd.Pixels[_cell].BrightNoise) * u_sin) + _cSet.HSL.l;
+
+                        _color[y, x] = Chroma.CreateFromHSL(_cSet.HSL.h, _cSet.Sat, _l, _cSet.HSL.a).ToColor();
+                    }
+                    else
+                    {
+                        // is the cell is null just fill with transparent pixel.
+                        _color[y, x] = Chroma.CreateFromBytes(0, 0, 0, 0).ToColor();
+                    }
+                }
+            }
+
+            if(cd.MirrorX) { _color = _color.MirrorX(); }
+            if(cd.MirrorY) { _color = _color.MirrorY(); }
+
+            var _output = new Bitmap(_color.GetWidth(), _color.GetHeight(), PixelFormat.Format32bppArgb);
+
+            for(int x = 0; x < _color.GetWidth(); x++)
+            {
+                for(int y = 0; y < _color.GetHeight(); y++)
+                {
+                    _output.SetPixel(x, y, _color[y, x]);
+                }
             }
 
             return _output;
