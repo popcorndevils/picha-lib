@@ -21,6 +21,7 @@ namespace PichaLib
         }
 
         private bool _MirrorX, _MirrorY;
+
         public bool MirrorX {
             get => this._MirrorX;
             set {
@@ -28,6 +29,7 @@ namespace PichaLib
                 this.LayerChanged?.Invoke(this, true);
             }
         }
+
         public bool MirrorY {
             get => this._MirrorY;
             set {
@@ -108,6 +110,49 @@ namespace PichaLib
                 this._Cycles = value;
                 this.LayerChanged?.Invoke(this, true);
             }
+        }
+
+        public List<Frame> RunCycles()
+        {
+            var _output = new List<Frame>();
+            foreach(Frame _frame in this.Frames)
+            {
+                _output.Add(_frame.RunCycles(this.Cycles));
+            }
+            return _output;
+        }
+
+        public CellData GenerateColors()
+        {
+            var _output = new CellData() {
+                MirrorX = this.MirrorX,
+                MirrorY = this.MirrorY,
+                Pixels = new Dictionary<string, PixelColors>(),
+            };
+
+            foreach(Pixel _type in this.Pixels.Values)
+            {
+                var _dat = new PixelColors() {
+                    FadeDirection = this.Pixels[_type.Name].FadeDirection,
+                    BrightNoise = this.Pixels[_type.Name].BrightNoise,
+                };
+                
+                if(_type.RandomCol)
+                {
+                    _dat.RGB = new Chroma(
+                        (float)PFactory.Random.NextDouble(),
+                        (float)PFactory.Random.NextDouble(),
+                        (float)PFactory.Random.NextDouble());
+                }
+                else
+                    { _dat.RGB = _type.Color; }
+
+                _dat.Sat = (float)PFactory.Random.RandfRange(_type.MinSaturation * _dat.HSL.s, _dat.HSL.s);
+
+                _output.Pixels.Add(_type.Name, _dat);
+            }
+
+            return _output;
         }
     }
 

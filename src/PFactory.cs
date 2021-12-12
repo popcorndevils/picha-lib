@@ -9,26 +9,28 @@ namespace PichaLib
 {
     public static partial class PFactory
     {
-        private static List<Bitmap> _Generate(Canvas c)
+        public static Random Random = new Random();
+
+        public static List<Bitmap> Generate(Canvas c)
         {
             var _output = new List<Bitmap>();
 
             foreach(Layer _l in c.Layers)
             {
                 var _canvasLayer = new Bitmap(c.Size.H, c.Size.W, PixelFormat.Canonical);
-                var _layerData = _Generate(_l)[0];
+                var _layerData = Generate(_l)[0];
                 _output.Add(_layerData);
             }
 
             return _output;
         }
 
-        private static List<Bitmap> _Generate(Layer l)
+        public static List<Bitmap> Generate(Layer l)
         {
-            return PFactory._GenColors(PFactory._RunCycles(l), l);
+            return PFactory._GenColors(l.RunCycles(), l);
         }
 
-        private static Bitmap _Generate(Frame f, CellData data)
+        public static Bitmap Generate(Frame f, CellData data)
         {
             int _w = f.GetWidth();
             int _h = f.GetHeight();
@@ -64,7 +66,7 @@ namespace PichaLib
                         }
 
                         float u_sin = (float)Math.Cos(_grade * Math.PI);
-                        float _l = (float)(PFactory._Random.RandfRange(0f, data.Pixels[_cell].BrightNoise) * u_sin) + _cSet.HSL.l;
+                        float _l = (float)(PFactory.Random.RandfRange(0f, data.Pixels[_cell].BrightNoise) * u_sin) + _cSet.HSL.l;
 
                         _color[y, x] = Chroma.CreateFromHSL(_cSet.HSL.h, _cSet.Sat, _l, _cSet.HSL.a).ToColor();
                     }
@@ -87,6 +89,20 @@ namespace PichaLib
                 {
                     _output.SetPixel(x, y, _color[y, x]);
                 }
+            }
+
+            return _output;
+        }
+
+        public static List<Bitmap> _GenColors(List<Frame> frames, Layer l)
+        {
+            var _output = new List<Bitmap>();
+            var _colors = l.GenerateColors();
+
+            foreach(Frame f in frames)
+            {
+                var _product = PFactory.Generate(f, _colors);
+                for(int i = 0; i < f.Timing; i++) { _output.Add(_product); }
             }
 
             return _output;
