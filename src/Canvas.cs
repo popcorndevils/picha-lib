@@ -1,12 +1,17 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
-using Bitmap = System.Drawing.Bitmap;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+
+using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace PichaLib
 {
     public class Canvas
     {
+        // helper for creating sprites
+        private SolidBrush _Brush = new SolidBrush(Color.FromArgb(0, 255, 255, 255));
+
         public List<Layer> Layers = new List<Layer>();
         public (int W, int H) Size = (16, 16);
         public int[] FrameCounts {
@@ -44,16 +49,28 @@ namespace PichaLib
             }
         }
 
-        public List<Bitmap> Generate()
+        public Bitmap Generate()
         {
+            // TODO: move sprite generation to this function.
             var _output = new List<Bitmap>();
+            var _frameNums = this.FrameCounts;
+            var _totalFrames = ExMath.LCD(_frameNums);
 
-            foreach(Layer _l in this.Layers)
+            var _spriteFrame = new Bitmap(this.Size.W, this.Size.H, PixelFormat.Format32bppArgb);
+
+            using (var _gfx = Graphics.FromImage(_spriteFrame))
             {
-                _output = (List<Bitmap>)_output.Concat(_l.Generate());
+                _gfx.FillRectangle(this._Brush, 0, 0, this.Size.W, this.Size.H);
+                _gfx.CompositingMode = CompositingMode.SourceOver;
+
+                foreach(Layer l in this.Layers)
+                {
+                    var _imgs = l.Generate();
+                    _gfx.DrawImageUnscaled(_imgs[0], new Point(l.X, l.Y));
+                }
             }
 
-            return _output;
+            return _spriteFrame;
         }
 
         // useful for the app only.
