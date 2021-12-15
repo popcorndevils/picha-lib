@@ -50,9 +50,6 @@ namespace PichaLib
 
             foreach(Layer _l in this.Layers)
             {
-                // var _canvasLayer = new Bitmap(this.Size.H, this.Size.W, PixelFormat.Canonical);
-                // [0] only grabs the first bitmap because Layer.Generate() creates images based on timing.
-                // TODO implement handling of timing variable so exporting will work.
                 _output = (List<Bitmap>)_output.Concat(_l.Generate());
             }
 

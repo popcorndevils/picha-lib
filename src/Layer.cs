@@ -138,11 +138,8 @@ namespace PichaLib
 
             foreach(Frame f in this.Frames)
             {
-                var _product = f.Generate(_colors);
-                for(int i = 0; i < f.Timing; i++)
-                {
-                    _output.Add(_product);
-                }
+                // NOTE: I experimented with accounting for timing of frames here, but I think I'd rather keep timing a helper thing that only exists to help the user plan out an animations.  If I try to export frames based on timing, I can quickly end up in a situation where an animation is thousands of frames.
+                _output.Add(f.Generate(_colors));
             }
 
             return _output;
