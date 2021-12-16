@@ -12,8 +12,17 @@ namespace PichaLib
         // helper for creating sprites
         private SolidBrush _Brush = new SolidBrush(Color.FromArgb(0, 255, 255, 255));
 
+        // main gen vars
         public List<Layer> Layers = new List<Layer>();
         public (int W, int H) Size = (16, 16);
+
+        // used in app
+        public bool AutoGen = true;
+        public float TimeToGen = 2f;
+        public float AnimTime = 1f;
+        public Chroma TransparencyFG = Chroma.CreateFromHex("#298c8c8c");
+        public Chroma TransparencyBG = new Chroma(.1f, .1f, .1f, 0f);
+
         public int[] FrameCounts {
             get {
                 var _val = new int[this.Layers.Count];
@@ -49,35 +58,88 @@ namespace PichaLib
             }
         }
 
-        public Bitmap Generate()
+        public Bitmap[] GenerateFrames(bool clip_content = true, int scale = 1)
         {
-            // TODO: move sprite generation to this function.
-            var _output = new List<Bitmap>();
-            var _frameNums = this.FrameCounts;
-            var _totalFrames = ExMath.LCD(_frameNums);
+            var _totalFrames = ExMath.LCD(this.FrameCounts);
+            var _output = new Bitmap[_totalFrames];
+            var _size = clip_content ? this.Size : this.TrueSize;
+            (int X, int Y) _offset = clip_content ? (0, 0) : (Math.Abs(this.Extents.MinX), Math.Abs(this.Extents.MinY));
 
-            var _spriteFrame = new Bitmap(this.Size.W, this.Size.H, PixelFormat.Format32bppArgb);
+            // do as two separate loops for now, can merge loops for efficiency if needed.
 
-            using (var _gfx = Graphics.FromImage(_spriteFrame))
+            for(int i = 0; i < _totalFrames; i++)
             {
-                _gfx.FillRectangle(this._Brush, 0, 0, this.Size.W, this.Size.H);
-                _gfx.CompositingMode = CompositingMode.SourceOver;
-
-                foreach(Layer l in this.Layers)
+                _output[i] = new Bitmap(_size.W, _size.H, PixelFormat.Format32bppArgb);
+                using(var _gfx = Graphics.FromImage(_output[i]))
                 {
-                    var _imgs = l.Generate();
-                    _gfx.DrawImageUnscaled(_imgs[0], new Point(l.X, l.Y));
+                    _gfx.FillRectangle(this._Brush, 0, 0, _size.W, _size.H);
+                }
+            }
+            
+            foreach(Layer l in this.Layers)
+            {
+                var _imgs = l.Generate();
+                int _copies_per_frame = _totalFrames / _imgs.Count;
+                int _times_copied = 0;
+
+                foreach(Bitmap _f in _imgs)
+                {
+                    for(int i = 0; i < _copies_per_frame; i++)
+                    {   
+                        using(var _gfx = Graphics.FromImage(_output[_times_copied]))
+                        {
+                            _gfx.CompositingMode = CompositingMode.SourceOver;
+
+                            _gfx.DrawImageUnscaled(_f, (l.X + _offset.X), (l.Y + _offset.Y));
+
+                            _times_copied++;
+                        }
+                    }
                 }
             }
 
-            return _spriteFrame;
+            if(scale != 1)
+            {
+                for(int i = 0; i < _output.Length; i++)
+                {
+                    var _f = _output[i];
+                    var _new_img = new Bitmap(_f.Width * scale, _f.Height * scale);
+
+                    using(Graphics _gfx = Graphics.FromImage(_new_img))
+                    {
+                        _gfx.InterpolationMode = InterpolationMode.NearestNeighbor;
+                        _gfx.PixelOffsetMode = PixelOffsetMode.Half;
+                        _gfx.DrawImage(_f, 0, 0, _new_img.Width, _new_img.Height);
+                    }
+
+                    _output[i] = _new_img;
+                }
+            }
+
+            return _output;
         }
 
-        // useful for the app only.
-        public bool AutoGen = false;
-        public float TimeToGen = 1f;
-        public float AnimTime = 3f;
-        public Chroma TransparencyFG = Chroma.CreateFromHex("#298c8c8c");
-        public Chroma TransparencyBG = new Chroma(.1f, .1f, .1f, 0f);
+        public Bitmap GenerateSprite(bool clip_content = true, int scale = 1)
+        {
+            var _frames = this.GenerateFrames(clip_content, scale);
+            (int W, int H) _s = (_frames[0].Width, _frames[0].Height);
+            
+            var _output = new Bitmap(_s.W * _frames.Length, _s.H, PixelFormat.Format32bppArgb);
+
+            using (var _gfx = Graphics.FromImage(_output))
+            {
+                _gfx.FillRectangle(this._Brush, 0, 0, _s.W, _s.H);
+                _gfx.CompositingMode = CompositingMode.SourceOver;
+
+                for(int i = 0; i < _frames.Length; i++)
+                {
+                    var _f = _frames[i];
+                    var _pos = new Point((_s.W * i), 0);
+                    _gfx.DrawImageUnscaled(_f, _pos);
+                }
+            }
+
+            return _output;
+        }
     }
 }
