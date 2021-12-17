@@ -42,7 +42,7 @@ namespace PichaLib
             return _output;
         }
 
-        public static Bitmap[] GenerateFrameSheets(Canvas canvas, int cols, int rows, int scale, bool clip_content)
+        public static Bitmap[] GenerateFrameSheets(Canvas canvas, int cols, int rows, int scale, bool clip_content, bool random_start = false)
         {
             int _sheets = ExMath.LCD(canvas.FrameCounts);
 
@@ -54,7 +54,7 @@ namespace PichaLib
             {
                 for(int y = 0; y < rows; y++)
                 {
-                    _frames[y, x] = canvas.GenerateFrames(clip_content, scale);
+                    _frames[y, x] = canvas.GenerateFrames(clip_content, scale, random_start);
                 }
             }
 

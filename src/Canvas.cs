@@ -58,7 +58,7 @@ namespace PichaLib
             }
         }
 
-        public Bitmap[] GenerateFrames(bool clip_content = true, int scale = 1)
+        public Bitmap[] GenerateFrames(bool clip_content = true, int scale = 1, bool random_start = false)
         {
             var _totalFrames = ExMath.LCD(this.FrameCounts);
             var _output = new Bitmap[_totalFrames];
@@ -96,6 +96,24 @@ namespace PichaLib
                         }
                     }
                 }
+            }
+
+            if(random_start)
+            {
+                var _rand = new Random();
+                var _start = _rand.Next(_output.Length);
+                var _new = new Bitmap[_output.Length];
+
+                for(int i = 0; i < _output.Length; i++)
+                {
+                    var _index = i + _start;
+                    if(_index >= _output.Length)
+                    {
+                        _index -= _output.Length;
+                    }
+                    _new[i] = _output[_index];
+                }
+                _output = _new;
             }
 
             if(scale != 1)
