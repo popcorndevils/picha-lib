@@ -79,7 +79,7 @@ namespace PichaLib
             foreach(Layer l in this.Layers)
             {
                 var _imgs = l.Generate();
-                int _copies_per_frame = _totalFrames / _imgs.Count;
+                int _copies_per_frame = _totalFrames / _imgs.Length;
                 int _times_copied = 0;
 
                 foreach(Bitmap _f in _imgs)

@@ -10,7 +10,35 @@ namespace PichaLib
         public static Random Random = new Random();
         private static SolidBrush _transparent = new SolidBrush(Color.FromArgb(0, 255, 255, 255));
 
-        public static Bitmap GenerateSpriteSheet(Canvas canvas, int cols, int rows, int scale, bool clip_content, bool random_start = false)
+        public static Bitmap GenLayerSheet(
+            Layer layer, int cols, int rows, int scale, (int w, int h) size)
+        {
+            (int W, int H) _frameSize = size == (0, 0) ? (layer.Size.W, layer.Size.H) : (size.w, size.h);
+            (int W, int H) _stripSize = (_frameSize.W * layer.FramesCount, _frameSize.H);
+
+            var _output = new Bitmap(_stripSize.W * cols, _stripSize.H * rows);
+
+            using(var _gfx = Graphics.FromImage(_output))
+            {
+                for(int x = 0; x < cols; x++)
+                {
+                    for(int y = 0; y < rows; y++)
+                    {
+                        var _frames = layer.Generate();
+                        for(int f = 0; f < _frames.Length; f++)
+                        {
+                            _gfx.DrawImageUnscaled(
+                                _frames[f],
+                                (x * _stripSize.W) + (f * _frameSize.W),
+                                (y * _stripSize.H));
+                        }
+                    }
+                }
+            }
+            return _output;
+        }
+
+        public static Bitmap GenSpriteSheet(Canvas canvas, int cols, int rows, int scale, bool clip_content, bool random_start = false)
         {
             var _sprites = new Bitmap[rows, cols];
 
@@ -42,7 +70,7 @@ namespace PichaLib
             return _output;
         }
 
-        public static Bitmap[] GenerateFrameSheets(Canvas canvas, int cols, int rows, int scale, bool clip_content, bool random_start = false)
+        public static Bitmap[] GenSpriteFrames(Canvas canvas, int cols, int rows, int scale, bool clip_content, bool random_start = false)
         {
             int _sheets = ExMath.LCD(canvas.FrameCounts);
 

@@ -114,7 +114,7 @@ namespace PichaLib
             }
         }
 
-        public List<Bitmap> Generate()
+        public Bitmap[] Generate()
         {
             return this.GenShape().GenColor();
         }
@@ -130,15 +130,14 @@ namespace PichaLib
             return _output;
         }
 
-        public List<Bitmap> GenColor()
+        public Bitmap[] GenColor()
         {
-            var _output = new List<Bitmap>();
+            var _output = new Bitmap[this.FramesCount];
             var _colors = this.PickColors();
 
-            foreach(Frame f in this.Frames)
+            for(int i = 0; i < this.FramesCount; i++)
             {
-                // NOTE: I experimented with accounting for timing of frames here, but I think I'd rather keep timing a helper thing that only exists to help the user plan out an animations.  If I try to export frames based on timing, I can quickly end up in a situation where an animation is thousands of frames.
-                _output.Add(f.Generate(_colors));
+                _output[i] = this.Frames[i].Generate(_colors);
             }
 
             return _output;
