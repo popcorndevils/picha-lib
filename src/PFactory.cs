@@ -10,7 +10,7 @@ namespace PichaLib
         public static Random Random = new Random();
         private static SolidBrush _transparent = new SolidBrush(Color.FromArgb(0, 255, 255, 255));
 
-        public static Bitmap GenerateSpriteSheet(Canvas canvas, int cols, int rows, int scale, bool clip_content)
+        public static Bitmap GenerateSpriteSheet(Canvas canvas, int cols, int rows, int scale, bool clip_content, bool random_start = false)
         {
             var _sprites = new Bitmap[rows, cols];
 
@@ -18,7 +18,7 @@ namespace PichaLib
             {
                 for(int y = 0; y < rows; y++)
                 {
-                    _sprites[y, x] = canvas.GenerateSprite(clip_content, scale);
+                    _sprites[y, x] = canvas.GenerateSprite(clip_content, scale, random_start);
                 }
             }
 

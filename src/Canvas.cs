@@ -137,9 +137,9 @@ namespace PichaLib
             return _output;
         }
 
-        public Bitmap GenerateSprite(bool clip_content = true, int scale = 1)
+        public Bitmap GenerateSprite(bool clip_content = true, int scale = 1, bool random_start = false)
         {
-            var _frames = this.GenerateFrames(clip_content, scale);
+            var _frames = this.GenerateFrames(clip_content, scale, random_start);
             (int W, int H) _s = (_frames[0].Width, _frames[0].Height);
             
             var _output = new Bitmap(_s.W * _frames.Length, _s.H, PixelFormat.Format32bppArgb);
