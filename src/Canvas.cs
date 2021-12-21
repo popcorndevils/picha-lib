@@ -23,6 +23,14 @@ namespace PichaLib
         public Chroma TransparencyFG = Chroma.CreateFromHex("#298c8c8c");
         public Chroma TransparencyBG = new Chroma(.1f, .1f, .1f, 0f);
 
+        private Dictionary<string, Pixel> _Pixels = new Dictionary<string, Pixel>();
+        public Dictionary<string, Pixel> Pixels {
+            get => this._Pixels;
+            set {
+                this._Pixels = value;
+            }
+        }
+
         public int[] FrameCounts {
             get {
                 var _val = new int[this.Layers.Count];
@@ -63,6 +71,9 @@ namespace PichaLib
             var _totalFrames = ExMath.LCD(this.FrameCounts);
             var _output = new Bitmap[_totalFrames];
             var _size = clip_content ? this.Size : this.TrueSize;
+
+            var _colors = PFactory.PickColors(this.Pixels);
+
             (int X, int Y) _offset = clip_content ? (0, 0) : (Math.Abs(this.Extents.MinX), Math.Abs(this.Extents.MinY));
 
             // do as two separate loops for now, can merge loops for efficiency if needed.
@@ -78,7 +89,7 @@ namespace PichaLib
             
             foreach(Layer l in this.Layers)
             {
-                var _imgs = l.Generate();
+                var _imgs = l.Generate(_colors);
                 int _copies_per_frame = _totalFrames / _imgs.Length;
                 int _times_copied = 0;
 
@@ -121,7 +132,7 @@ namespace PichaLib
                 for(int i = 0; i < _output.Length; i++)
                 {
                     var _f = _output[i];
-                    var _new_img = new Bitmap(_f.Width * scale, _f.Height * scale);
+                    var _new_img = new Bitmap(_f.Width * scale, _f.Height * scale, PixelFormat.Format32bppArgb);
 
                     using(Graphics _gfx = Graphics.FromImage(_new_img))
                     {
@@ -152,8 +163,7 @@ namespace PichaLib
                 for(int i = 0; i < _frames.Length; i++)
                 {
                     var _f = _frames[i];
-                    var _pos = new Point((_s.W * i), 0);
-                    _gfx.DrawImageUnscaled(_f, _pos);
+                    _gfx.DrawImageUnscaled(_f, (_s.W * i), 0);
                 }
             }
 

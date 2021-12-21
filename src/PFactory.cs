@@ -1,7 +1,11 @@
 using System;
 using System.Drawing;
+using System.Collections.Generic;
 
 using CompositingMode = System.Drawing.Drawing2D.CompositingMode;
+using PixelFormat = System.Drawing.Imaging.PixelFormat;
+
+using OctavianLib;
 
 namespace PichaLib
 {
@@ -9,34 +13,6 @@ namespace PichaLib
     {
         public static Random Random = new Random();
         private static SolidBrush _transparent = new SolidBrush(Color.FromArgb(0, 255, 255, 255));
-
-        public static Bitmap GenLayerSheet(
-            Layer layer, int cols, int rows, int scale, (int w, int h) size)
-        {
-            (int W, int H) _frameSize = size == (0, 0) ? (layer.Size.W, layer.Size.H) : (size.w, size.h);
-            (int W, int H) _stripSize = (_frameSize.W * layer.FramesCount, _frameSize.H);
-
-            var _output = new Bitmap(_stripSize.W * cols, _stripSize.H * rows);
-
-            using(var _gfx = Graphics.FromImage(_output))
-            {
-                for(int x = 0; x < cols; x++)
-                {
-                    for(int y = 0; y < rows; y++)
-                    {
-                        var _frames = layer.Generate();
-                        for(int f = 0; f < _frames.Length; f++)
-                        {
-                            _gfx.DrawImageUnscaled(
-                                _frames[f],
-                                (x * _stripSize.W) + (f * _frameSize.W),
-                                (y * _stripSize.H));
-                        }
-                    }
-                }
-            }
-            return _output;
-        }
 
         public static Bitmap GenSpriteSheet(Canvas canvas, int cols, int rows, int scale, bool clip_content, bool random_start = false)
         {
@@ -52,7 +28,7 @@ namespace PichaLib
 
             (int W, int H) _size = (_sprites[0, 0].Width, _sprites[0, 0].Height);
 
-            var _output = new Bitmap(_size.W * cols, _size.H * rows);
+            var _output = new Bitmap(_size.W * cols, _size.H * rows, PixelFormat.Format32bppArgb);
 
             using(Graphics _gfx = Graphics.FromImage(_output))
             {
@@ -90,7 +66,7 @@ namespace PichaLib
 
             for(int s = 0; s < _sheets; s++)
             {
-                _output[s] = new Bitmap(_size.W * cols, _size.H * rows);
+                _output[s] = new Bitmap(_size.W * cols, _size.H * rows, PixelFormat.Format32bppArgb);
 
                 using(Graphics _gfx = Graphics.FromImage(_output[s]))
                 {
@@ -104,6 +80,35 @@ namespace PichaLib
                         }
                     }
                 }
+            }
+
+            return _output;
+        }
+
+        public static Dictionary<string, PixelColors> PickColors(Dictionary<string, Pixel> pixels)
+        {
+            var _output = new Dictionary<string, PixelColors>();
+
+            foreach(Pixel _type in pixels.Values)
+            {
+                var _dat = new PixelColors() {
+                    FadeDirection = pixels[_type.Name].FadeDirection,
+                    BrightNoise = pixels[_type.Name].BrightNoise,
+                };
+                
+                if(_type.RandomCol)
+                {
+                    _dat.RGB = new Chroma(
+                        (float)PFactory.Random.NextDouble(),
+                        (float)PFactory.Random.NextDouble(),
+                        (float)PFactory.Random.NextDouble());
+                }
+                else
+                    { _dat.RGB = _type.Color; }
+
+                _dat.Sat = (float)PFactory.Random.RandfRange(_type.MinSaturation * _dat.HSL.s, _dat.HSL.s);
+
+                _output.Add(_type.Name, _dat);
             }
 
             return _output;
