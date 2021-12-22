@@ -12,7 +12,6 @@ namespace PichaLib
     public class Frame
     {
         public string[,] Data;
-        public int Timing = 1;
 
         public int GetWidth() { return this.Data.GetWidth(); }
         public int GetHeight() { return this.Data.GetHeight(); }
@@ -75,7 +74,7 @@ namespace PichaLib
 
         public Frame RunCycles(List<Cycle> cycles)
         {
-            var _output = new Frame() { Timing = this.Timing };
+            var _output = new Frame();
             _output.Data = this.Data.Copy();
 
             foreach(Cycle _cycle in cycles)
