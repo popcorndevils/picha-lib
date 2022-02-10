@@ -12,12 +12,26 @@ using OctavianLib;
 
 namespace PichaLib
 {
-    public delegate void LayerChangeHandler(LayerChangeEvent change);
+    public delegate void LayerChangeHandler(LayerChangeEvent e);
+
+    public struct LayerChangeEvent
+    {
+        public LayerChangeType Type;
+        public Object OldValue;
+        public Object NewValue;
+        public Layer Sender;
+        public bool Major;
+    }
+
+    public enum LayerChangeType
+    {
+        NULL, NAME, POSITION, FRAME, MIRROR_X, MIRROR_Y, CYCLES
+    }
 
     public class Layer
     {
         public event LayerChangeHandler LayerChanged;
-
+        private CellData _ColorData;
         // helper for creating sprites
         private SolidBrush _Brush = new SolidBrush(Color.FromArgb(0, 255, 255, 255));
 
@@ -25,16 +39,17 @@ namespace PichaLib
         public string Name {
             get => this._Name;
             set {
-                var _old = this._Name;
-                this._Name = value;
-                var _change = new LayerChangeEvent() {
-                    Sender = this,
+
+                var _e = new LayerChangeEvent() {
                     Type = LayerChangeType.NAME,
-                    OldValue = _old,
-                    NewValue = this._Name,
+                    OldValue = this._Name,
+                    NewValue = value,
+                    Sender = this,
                     Major = false,
                 };
-                this.LayerChanged?.Invoke(_change);
+
+                this._Name = value;
+                this.LayerChanged?.Invoke(_e);
             }
         }
 
@@ -43,30 +58,32 @@ namespace PichaLib
         public bool MirrorX {
             get => this._MirrorX;
             set {
-                this._MirrorX = value;
-                var _change = new LayerChangeEvent() {
+                var _e = new LayerChangeEvent() {
+                    Type = LayerChangeType.MIRROR_X,
+                    OldValue = this._MirrorX,
+                    NewValue = value,
                     Sender = this,
-                    Type = LayerChangeType.NULL,
-                    OldValue = "old",
-                    NewValue = "new",
                     Major = true,
                 };
-                this.LayerChanged?.Invoke(_change);
+
+                this._MirrorX = value;
+                this.LayerChanged?.Invoke(_e);
             }
         }
 
         public bool MirrorY {
             get => this._MirrorY;
             set {
-                this._MirrorY = value;
-                var _change = new LayerChangeEvent() {
+                var _e = new LayerChangeEvent() {
+                    Type = LayerChangeType.MIRROR_Y,
+                    OldValue = this._MirrorY,
+                    NewValue = value,
                     Sender = this,
-                    Type = LayerChangeType.NULL,
-                    OldValue = "old",
-                    NewValue = "new",
                     Major = true,
                 };
-                this.LayerChanged?.Invoke(_change);
+
+                this._MirrorY = value;
+                this.LayerChanged?.Invoke(_e);
             }
         }
 
@@ -74,31 +91,31 @@ namespace PichaLib
         public int X {
             get => this._X;
             set {
-                var _old = $"({this.X}, {this.Y})";
-                this._X = value;
-                var _change = new LayerChangeEvent() {
-                    Sender = this,
+                var _e = new LayerChangeEvent() {
                     Type = LayerChangeType.POSITION,
-                    OldValue = _old,
-                    NewValue = $"({this.X}, {this.Y})",
+                    OldValue = (this._X, this._Y),
+                    NewValue = (value, this._Y),
+                    Sender = this,
                     Major = false,
                 };
-                this.LayerChanged?.Invoke(_change);
+
+                this._X = value;
+                this.LayerChanged?.Invoke(_e);
             }
         }
         public int Y {
             get => this._Y;
             set {
-                var _old = $"({this.X}, {this.Y})";
-                this._Y = value;
-                var _change = new LayerChangeEvent() {
-                    Sender = this,
+                var _e = new LayerChangeEvent() {
                     Type = LayerChangeType.POSITION,
-                    OldValue = _old,
-                    NewValue = $"({this.X}, {this.Y})",
+                    OldValue = (this._X, this._Y),
+                    NewValue =  (this._X, value),
+                    Sender = this,
                     Major = false,
                 };
-                this.LayerChanged?.Invoke(_change);
+
+                this._Y = value;
+                this.LayerChanged?.Invoke(_e);
             }
         }
 
@@ -118,36 +135,42 @@ namespace PichaLib
             set {
                 if(this.X != value.X || this.Y != value.Y)
                 {
-                    var _old = $"({this.X}, {this.Y})";
-                    this._X = value.X;
-                    this._Y = value.Y;
-                    var _change = new LayerChangeEvent() {
-                        Sender = this,
+                    var _e = new LayerChangeEvent() {
                         Type = LayerChangeType.POSITION,
-                        OldValue = _old,
-                        NewValue = $"({this.X}, {this.Y})",
+                        OldValue = (this._X, this._Y),
+                        NewValue =  (value.X, value.Y),
+                        Sender = this,
                         Major = false,
                     };
-                    this.LayerChanged?.Invoke(_change);
+                    
+                    this._X = value.X;
+                    this._Y = value.Y;
+                    this.LayerChanged?.Invoke(_e);
                 }
             }
         }
 
-        public int FramesCount => this.Frames.Count;
+        public int FramesCount {
+            get {
+                // NOTE: don't return values based on timing anymore
+                return this.Frames.Count;
+            }
+        }
 
         private List<Frame> _Frames = new List<Frame>();
         public List<Frame> Frames {
             get => this._Frames;
             set {
-                this._Frames = value;
-                var _change = new LayerChangeEvent() {
+                var _e = new LayerChangeEvent() {
+                    Type = LayerChangeType.FRAME,
+                    OldValue = this._Frames,
+                    NewValue =  value,
                     Sender = this,
-                    Type = LayerChangeType.NULL,
-                    OldValue = "",
-                    NewValue = "",
                     Major = true,
                 };
-                this.LayerChanged?.Invoke(_change);
+
+                this._Frames = value;
+                this.LayerChanged?.Invoke(_e);
             }
         }
         
@@ -155,15 +178,16 @@ namespace PichaLib
         public List<Cycle> Cycles {
             get => this._Cycles;
             set {
-                this._Cycles = value;
-                var _change = new LayerChangeEvent() {
+                var _e = new LayerChangeEvent() {
+                    Type = LayerChangeType.CYCLES,
+                    OldValue = this._Cycles,
+                    NewValue =  value,
                     Sender = this,
-                    Type = LayerChangeType.NULL,
-                    OldValue = "old",
-                    NewValue = "new",
                     Major = true,
                 };
-                this.LayerChanged?.Invoke(_change);
+
+                this._Cycles = value;
+                this.LayerChanged?.Invoke(_e);
             }
         }
 
@@ -231,22 +255,5 @@ namespace PichaLib
         EAST,
         WEST,
         RANDOM
-    }
-
-    public enum LayerChangeType
-    {
-        NULL,
-        NAME,
-        POSITION,
-        FRAME
-    }
-
-    public struct LayerChangeEvent
-    {
-        public Layer Sender;
-        public LayerChangeType Type;
-        public bool Major;
-        public string OldValue;
-        public string NewValue;
     }
 }
