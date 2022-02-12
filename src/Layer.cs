@@ -25,7 +25,7 @@ namespace PichaLib
 
     public enum LayerChangeType
     {
-        NULL, NAME, POSITION, FRAME, MIRROR_X, MIRROR_Y, CYCLES
+        NULL, NAME, POSITION, FRAME, MIRROR_X, MIRROR_Y, CYCLES, NEW_LAYER
     }
 
     public class Layer
