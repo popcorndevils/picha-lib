@@ -22,18 +22,20 @@ namespace PichaLib
         public static List<string> GatherNeighbors(this string[,] array, int x, int y)
         {
             List<string> _output = new List<string>();
-            List<(int xT, int yT)> _addresses = new List<(int xT, int yT)>() {
+            (int xT, int yT)[] _addresses = new (int xT, int yT)[] {
                 (x - 1, y),
                 (x + 1, y),
                 (x, y - 1),
                 (x, y + 1),
             };
 
-            // TODO Fix this kind of wonky implementation?
             foreach((int xT, int yT) _a in _addresses)
             {
-                try { _output.Add(array[_a.yT, _a.xT]); }
-                catch {}
+                if(_a.xT > 0 && _a.xT < array.GetLength(1) && 
+                   _a.yT > 0 && _a.yT < array.GetLength(0))
+                {
+                    _output.Add(array[_a.yT, _a.xT]);
+                }
             }
 
             return _output;
