@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-
+using SkiaSharp;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace PichaLib
@@ -66,7 +66,7 @@ namespace PichaLib
             }
         }
 
-        public Bitmap[] GenerateFrames(bool clip_content = true, int scale = 1, bool random_start = false)
+        public Bitmap[] GenerateFrames_OLD(bool clip_content = true, int scale = 1, bool random_start = false)
         {
             var _totalFrames = ExMath.LCD(this.FrameCounts);
             var _output = new Bitmap[_totalFrames];
@@ -147,10 +147,89 @@ namespace PichaLib
 
             return _output;
         }
+        
+        public SKBitmap[] GenerateFrames(bool clip_content = true, int scale = 1, bool random_start = false)
+        {
+            var _totalFrames = ExMath.LCD(this.FrameCounts);
+            var _output = new SKBitmap[_totalFrames];
+            var _size = clip_content ? this.Size : this.TrueSize;
+
+            var _colors = PFactory.PickColors(this.Pixels);
+
+            (int X, int Y) _offset = clip_content ? (0, 0) : (Math.Abs(this.Extents.MinX), Math.Abs(this.Extents.MinY));
+
+            // do as two separate loops for now, can merge loops for efficiency if needed.
+
+            for(int i = 0; i < _totalFrames; i++)
+            {
+                _output[i] = new SKBitmap(_size.W, _size.H);
+                using(var canvas = new SKCanvas(_output[i]))
+                {
+                    canvas.Clear(SKColor.Empty);
+                }
+            }
+            
+            foreach(Layer l in this.Layers)
+            {
+                var _imgs = l.Generate(_colors);
+                int _copies_per_frame = _totalFrames / _imgs.Length;
+                int _times_copied = 0;
+
+                foreach(Bitmap _f in _imgs)
+                {
+                    SKBitmap b = _f.ToSkia();
+                    for(int i = 0; i < _copies_per_frame; i++)
+                    {   
+                        using(var canvas = new SKCanvas(_output[_times_copied]))
+                        {
+                            canvas.DrawBitmap(b,
+                                new SKPoint(l.X + _offset.X, l.Y + _offset.Y));
+                        }
+                        _times_copied++;
+                    }
+                }
+            }
+
+            if(random_start)
+            {
+                var _rand = new Random();
+                var _start = _rand.Next(_output.Length);
+                var _new = new SKBitmap[_output.Length];
+
+                for(int i = 0; i < _output.Length; i++)
+                {
+                    var _index = i + _start;
+                    if(_index >= _output.Length)
+                    {
+                        _index -= _output.Length;
+                    }
+                    _new[i] = _output[_index];
+                }
+                _output = _new;
+            }
+
+            if(scale != 1)
+            {
+                for(int i = 0; i < _output.Length; i++)
+                {
+                    var _f = _output[i];
+                    var _new_img = new SKBitmap(_f.Width * scale, _f.Height * scale);
+                    using(var canvas = new SKCanvas(_new_img))
+                    {
+                        canvas.Clear(SKColor.Empty);
+                    }
+                    _f.ScalePixels(_new_img, SKFilterQuality.None);
+
+                    _output[i] = _new_img;
+                }
+            }
+
+            return _output;
+        }
 
         public Bitmap GenerateSprite(bool clip_content = true, int scale = 1, bool random_start = false)
         {
-            var _frames = this.GenerateFrames(clip_content, scale, random_start);
+            var _frames = this.GenerateFrames_OLD(clip_content, scale, random_start);
             (int W, int H) _s = (_frames[0].Width, _frames[0].Height);
             
             var _output = new Bitmap(_s.W * _frames.Length, _s.H, PixelFormat.Format32bppArgb);

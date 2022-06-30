@@ -1,7 +1,7 @@
 using System;
 using System.Drawing;
 using System.Collections.Generic;
-
+using SkiaSharp;
 using CompositingMode = System.Drawing.Drawing2D.CompositingMode;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
@@ -58,7 +58,7 @@ namespace PichaLib
             {
                 for(int y = 0; y < rows; y++)
                 {
-                    _frames[y, x] = canvas.GenerateFrames(clip_content, scale, random_start);
+                    _frames[y, x] = canvas.GenerateFrames_OLD(clip_content, scale, random_start);
                 }
             }
 
