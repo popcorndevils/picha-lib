@@ -5,7 +5,6 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="SkiaSharp" Version="2.88.0" />
-    <PackageReference Include="System.Drawing.Common" Version="*" />
     <ProjectReference Include="..\octavian-lib\OctavianLib.csproj">
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
     </ProjectReference>
