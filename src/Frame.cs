@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-
-using SysColor = System.Drawing.Color;
+using SkiaSharp;
 using Bitmap = System.Drawing.Bitmap;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
@@ -85,11 +84,11 @@ namespace PichaLib
             return _output;
         }
 
-        public Bitmap Generate(CellData cd)
+        public SKBitmap Generate(CellData cd)
         {
             int _w = this.GetWidth();
             int _h = this.GetHeight();
-            var _color = new SysColor[_h, _w];
+            var _color = new SKColor[_h, _w];
 
             for(int y = 0; y < _h; y++)
             {
@@ -136,7 +135,7 @@ namespace PichaLib
             if(cd.MirrorX) { _color = _color.MirrorX(); }
             if(cd.MirrorY) { _color = _color.MirrorY(); }
 
-            var _output = new Bitmap(_color.GetWidth(), _color.GetHeight(), PixelFormat.Format32bppArgb);
+            var _output = new SKBitmap(_color.GetWidth(), _color.GetHeight());
 
             for(int x = 0; x < _color.GetWidth(); x++)
             {

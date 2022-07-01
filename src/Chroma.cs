@@ -1,4 +1,5 @@
 using SysDraw = System.Drawing;
+using SkiaSharp;
 
 namespace PichaLib
 {
@@ -56,10 +57,11 @@ namespace PichaLib
             { return $"PichaLib.Chroma {{R: {this.R}, G: {this.G}, B: {this.B}, A: {this.A}}}"; }
 
         
-        public SysDraw.Color ToColor()
+        public SKColor ToColor()
         {
             var _c = this.IntRGBA;
-            return SysDraw.Color.FromArgb(_c.a, _c.r, _c.g, _c.b);
+            // return SysDraw.Color.FromArgb(_c.a, _c.r, _c.g, _c.b);
+            return new SKColor((byte)_c.r, (byte)_c.g, (byte)_c.b, (byte)_c.a);
         }
     }
 }

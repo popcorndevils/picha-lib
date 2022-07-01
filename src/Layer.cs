@@ -236,7 +236,7 @@ namespace PichaLib
 
             for(int i = 0; i < this.FramesCount; i++)
             {
-                _output[i] = this.Frames[i].Generate(_colors).ToSkia();
+                _output[i] = this.Frames[i].Generate(_colors);
             }
 
             return _output;
