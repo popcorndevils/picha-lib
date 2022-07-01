@@ -22,7 +22,7 @@ namespace PichaLib
             {
                 for(int y = 0; y < rows; y++)
                 {
-                    _sprites[y, x] = canvas.GenerateSprite(clip_content, scale, random_start);
+                    _sprites[y, x] = canvas.GenerateSprite(clip_content, scale, random_start).ToSystem();
                 }
             }
 
@@ -58,7 +58,7 @@ namespace PichaLib
             {
                 for(int y = 0; y < rows; y++)
                 {
-                    _frames[y, x] = canvas.GenerateFrames_OLD(clip_content, scale, random_start);
+                    _frames[y, x] = canvas.GenerateFrames_OLD(clip_content, scale, random_start).ToSystem();
                 }
             }
 

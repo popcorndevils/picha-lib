@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 
+using SkiaSharp;
+
 using Bitmap = System.Drawing.Bitmap;
 using Graphics = System.Drawing.Graphics;
 using SolidBrush = System.Drawing.SolidBrush;
@@ -31,9 +33,6 @@ namespace PichaLib
     public class Layer
     {
         public event LayerChangeHandler LayerChanged;
-        private CellData _ColorData;
-        // helper for creating sprites
-        private SolidBrush _Brush = new SolidBrush(Color.FromArgb(0, 255, 255, 255));
 
         private string _Name;
         public string Name {
@@ -191,26 +190,23 @@ namespace PichaLib
             }
         }
 
-        public Bitmap[] Generate(Dictionary<string, PixelColors> colors)
+        public SKBitmap[] Generate(Dictionary<string, PixelColors> colors)
         {
             return this.GenShape().GenColor(colors);
         }
 
-        public Bitmap GenerateSheet(Dictionary<string, PixelColors> colors)
+        public SKBitmap GenerateSheet(Dictionary<string, PixelColors> colors)
         {
             var _frames = this.Generate(colors);
             (int W, int H) _s = (_frames[0].Width, _frames[0].Height);
-            var _output = new Bitmap(_s.W * _frames.Length, _s.H, PixelFormat.Format32bppArgb);
+            var _output = new SKBitmap(_s.W * _frames.Length, _s.H);
 
-            using (var _gfx = Graphics.FromImage(_output))
+            using(var canvas = new SKCanvas(_output))
             {
-                _gfx.FillRectangle(this._Brush, 0, 0, _s.W, _s.H);
-                _gfx.CompositingMode = CompositingMode.SourceOver;
-
+                canvas.Clear(SKColor.Empty);
                 for(int i = 0; i < _frames.Length; i++)
                 {
-                    var _f = _frames[i];
-                    _gfx.DrawImageUnscaled(_f, (_s.W * i), 0);
+                    canvas.DrawBitmap(_frames[i], new SKPoint(_s.W * i, 0));
                 }
             }
 
@@ -228,9 +224,9 @@ namespace PichaLib
             return _output;
         }
 
-        public Bitmap[] GenColor(Dictionary<string, PixelColors> colors)
+        public SKBitmap[] GenColor(Dictionary<string, PixelColors> colors)
         {
-            var _output = new Bitmap[this.FramesCount];
+            var _output = new SKBitmap[this.FramesCount];
 
             var _colors = new CellData() {
                 MirrorX = this.MirrorX,
@@ -240,7 +236,7 @@ namespace PichaLib
 
             for(int i = 0; i < this.FramesCount; i++)
             {
-                _output[i] = this.Frames[i].Generate(_colors);
+                _output[i] = this.Frames[i].Generate(_colors).ToSkia();
             }
 
             return _output;
