@@ -1,4 +1,3 @@
-using SysDraw = System.Drawing;
 using SkiaSharp;
 
 namespace PichaLib

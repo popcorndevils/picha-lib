@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
 using SkiaSharp;
-using Bitmap = System.Drawing.Bitmap;
-using PixelFormat = System.Drawing.Imaging.PixelFormat;
-
 using OctavianLib;
 
 namespace PichaLib

@@ -1,15 +1,6 @@
 using System;
 using System.Collections.Generic;
-
 using SkiaSharp;
-
-using Bitmap = System.Drawing.Bitmap;
-using Graphics = System.Drawing.Graphics;
-using SolidBrush = System.Drawing.SolidBrush;
-using Color = System.Drawing.Color;
-using CompositingMode = System.Drawing.Drawing2D.CompositingMode;
-using PixelFormat = System.Drawing.Imaging.PixelFormat;
-
 using OctavianLib;
 
 namespace PichaLib

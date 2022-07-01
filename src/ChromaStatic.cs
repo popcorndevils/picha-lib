@@ -1,5 +1,5 @@
 using System;
-using SysDraw = System.Drawing;
+using SkiaSharp;
 
 namespace PichaLib
 {
@@ -11,16 +11,14 @@ namespace PichaLib
         public static Chroma CreateFromHSL(float h, float s, float l, float a)
             { return new Chroma(Chroma.HSLtoRGB(h, s, l, a)); }
         public static Chroma CreateFromHex(string hex)
-            { return Chroma.CreateFromSysCol(SysDraw.ColorTranslator.FromHtml(hex)); }
-        public static Chroma CreateFromName(string name)
-            { return Chroma.CreateFromSysCol(SysDraw.Color.FromName(name)); }
-        public static Chroma CreateFromSysCol(System.Drawing.Color col)
+            { return Chroma.CreateFromSkia(SKColor.Parse(hex)); }
+        public static Chroma CreateFromSkia(SKColor col)
         { 
             return new Chroma(
-                (float)(col.R / 255f),
-                (float)(col.G / 255f),
-                (float)(col.B / 255f),
-                (float)(col.A / 255f)
+                (float)(col.Red / 255f),
+                (float)(col.Green / 255f),
+                (float)(col.Blue / 255f),
+                (float)(col.Alpha / 255f)
             );
         }
         public static Chroma CreateFromBytes(byte r, byte g, byte b, byte a)
