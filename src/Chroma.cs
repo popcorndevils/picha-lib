@@ -56,7 +56,7 @@ namespace PichaLib
             { return $"PichaLib.Chroma {{R: {this.R}, G: {this.G}, B: {this.B}, A: {this.A}}}"; }
 
         
-        public SKColor ToColor()
+        public SKColor ToSkia()
         {
             var _c = this.IntRGBA;
             // return SysDraw.Color.FromArgb(_c.a, _c.r, _c.g, _c.b);

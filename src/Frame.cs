@@ -119,12 +119,12 @@ namespace PichaLib
                         float u_sin = (float)Math.Cos(_grade * Math.PI);
                         float _l = (float)(PFactory.Random.RandfRange(0f, cd.Pixels[_cell].BrightNoise) * u_sin) + _cSet.HSL.l;
 
-                        _color[y, x] = Chroma.CreateFromHSL(_cSet.HSL.h, _cSet.Sat, _l, _cSet.HSL.a).ToColor();
+                        _color[y, x] = Chroma.CreateFromHSL(_cSet.HSL.h, _cSet.Sat, _l, _cSet.HSL.a).ToSkia();
                     }
                     else
                     {
                         // is the cell is null just fill with transparent pixel.
-                        _color[y, x] = Chroma.CreateFromBytes(0, 0, 0, 0).ToColor();
+                        _color[y, x] = Chroma.CreateFromBytes(0, 0, 0, 0).ToSkia();
                     }
                 }
             }
